@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-chess
+requests
+beautifulsoup4
+redis
+firebase-admin
+pytest
+black
+flake8
