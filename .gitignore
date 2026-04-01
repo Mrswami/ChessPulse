@@ -1,5 +1,46 @@
+# Virtual environments
 venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+include/
+
+# Python caching and byte-code
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
 .pytest_cache/
+.mypy_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Databases and secrets
+.env
+*.db
+*.sqlite
+service-account-file.json
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# IDEs and Editors
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
