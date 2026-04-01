@@ -1,9 +1,9 @@
 fastapi
 uvicorn[standard]
+gunicorn
 python-chess
 requests
 beautifulsoup4
-redis
 firebase-admin
 pytest
 black
