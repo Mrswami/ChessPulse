@@ -1,46 +1,30 @@
-# Virtual environments
-venv/
-.venv/
-env/
-ENV/
-bin/
-lib/
-include/
+# Local Development
+.env
+.env.local
 
-# Python caching and byte-code
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
-.mypy_cache/
-.tox/
-.coverage
-htmlcov/
-
-# Distribution / packaging
+# Build Artifacts
 dist/
 build/
-*.egg-info/
+*.pyc
+__pycache__/
 
-# Databases and secrets
-.env
-*.db
-*.sqlite
-service-account-file.json
+# Dependencies
+node_modules/
+venv/
+.venv/
 
-# Firebase
-.firebase/
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
-
-# IDEs and Editors
+# IDE & OS
 .vscode/
 .idea/
-.cursor/
-*.swp
-*.swo
-
-# OS files
 .DS_Store
 Thumbs.db
+
+# Firebase local data
+.firebase/
+.firebaserc # Usually safe but optional
+firebase-debug.log*
+firestore-debug.log*
+
+# Mac & Windows
+Desktop.ini
+.DS_Store

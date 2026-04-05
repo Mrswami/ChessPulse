@@ -2,14 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
+// Using Vite environment variables for a professional, secure'Option 3' setup
 const firebaseConfig = {
-  apiKey: "AIzaSyBFKxK1tHUptvtaqqRRSBC0Ou9vh5jxAKc",
-  authDomain: "chesspulse-faacc.firebaseapp.com",
-  projectId: "chesspulse-faacc",
-  storageBucket: "chesspulse-faacc.firebasestorage.app",
-  messagingSenderId: "957477307302",
-  appId: "1:957477307302:web:7437053a9549d968fbc567",
-  measurementId: "G-G2Z1LFH3KJ"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);

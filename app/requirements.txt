@@ -1,0 +1,10 @@
+requests
+pydantic
+gunicorn
+uvicorn
+firebase-admin
+fastapi
+python-multipart
+uvicorn[standard]
+beautifulsoup4
+lxml

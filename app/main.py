@@ -3,11 +3,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import requests
+import firebase_admin
+from ingestors.lichess import fetch_lichess_broadcasts
+from ingestors.chesscom import fetch_chess_com_events
+from ingestors.fide import fetch_fide_major_events
+from utils.normalization import deduplicate_events
+from utils.cache import get_cached_tournaments, set_cached_tournaments
+
+# Automatic initialization for Cloud Run (uses Default Service Credentials)
+try:
+    firebase_admin.initialize_app()
+except ValueError:
+    pass # Already initialized
 
 app = FastAPI(
     title="ChessPulse API",
     description="The Global Chess Tournament Aggregator",
-    version="0.1.0",
+    version="0.2.0", # Bumped version for OTB & Cache update
 )
 
 # CORS configuration for local React development and production
@@ -30,46 +42,32 @@ class ChessEvent(BaseModel):
     participants: List[str]
     hype_score: Optional[int] = 0
 
-def fetch_chess_com_tournaments():
-    """Simple stub for pulling from Chess.com PubAPI"""
-    # Real URL: https://api.chess.com/pub/tournament/ - requires specific tournament subpaths
-    # For now, mirroring our unified schema with a small dynamic twist
-    return [
-        {
-            "event_id": "com_tt_01",
-            "title": "Titled Tuesday (Blitz)",
-            "platform": "Chess.com",
-            "type": "Online / Blitz",
-            "start_time": "2026-03-24T18:00:00Z",
-            "status": "Upcoming",
-            "watch_links": ["https://twitch.tv/chess", "https://chess.com/tv"],
-            "participants": ["Hikaru", "Magnus", "Alireza"],
-            "hype_score": 92
-        }
-    ]
-
-def fetch_lichess_broadcasts():
-    """Simple stub for pulling from Lichess Broadcast API"""
-    return [
-        {
-            "event_id": "li_candidates_01",
-            "title": "FIDE Candidates Tournament",
-            "platform": "Lichess",
-            "type": "OTB",
-            "start_time": "2026-04-02T13:00:00Z",
-            "status": "LIVE",
-            "watch_links": ["https://lichess.org/broadcast"],
-            "participants": ["Gukesh", "Caruana", "Nepo"],
-            "hype_score": 98
-        }
-    ]
-
 @app.get("/")
 def read_root():
     return {"message": "Welcome to ChessPulse API. Explore /docs for more information."}
 
 @app.get("/tournaments", response_model=List[ChessEvent])
 def get_tournaments():
-    # In a full ingestor cycle, this would be fueled by a Redis/Firestore cache
-    events = fetch_chess_com_tournaments() + fetch_lichess_broadcasts()
-    return events
+    # 1. CHECK CACHE FIRST (Speed & Reliability)
+    cached_data = get_cached_tournaments()
+    if cached_data:
+        return cached_data
+
+    # 2. CACHING MISS: Fetch all raw data from current sources
+    # Pulse is now fully global: Online (2 major) + OTB (Official FIDE)
+    all_raw_events = (
+        fetch_lichess_broadcasts() + 
+        fetch_chess_com_events() + 
+        fetch_fide_major_events()
+    )
+    
+    # 3. NORMALIZE: Apply the 'Super Card' deduplication engine
+    unified_events = deduplicate_events(all_raw_events)
+    
+    # 4. SORT: Ensure they are sorted globally by the final hype score
+    unified_events.sort(key=lambda x: x['hype_score'], reverse=True)
+    
+    # 5. UPDATE CACHE: Save for the next users
+    set_cached_tournaments(unified_events)
+    
+    return unified_events

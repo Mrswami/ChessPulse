@@ -15,11 +15,14 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at top left, #1a1a2e, #0a0a0c);
+  background: #050505;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.15) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.15) 0, transparent 50%);
+  overflow-x: hidden;
 }
 
 #root {
@@ -93,7 +96,7 @@ h1 {
 
 .chess-com { background: #81b64c; color: white; }
 .lichess { background: #333; color: #bababa; }
-.fide { background: #00529b; color: white; }
+[class*="fide"] { background: #00529b; color: white; }
 
 .status-badge {
   float: right;
@@ -107,18 +110,92 @@ h1 {
   top: 0;
   left: 0;
   right: 0;
-  padding: 1rem 2rem;
-  background: rgba(10, 10, 12, 0.8);
-  backdrop-filter: blur(20px);
-  z-index: 100;
+  padding: 0.75rem 4rem;
+  background: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav-brand {
   font-weight: 900;
-  font-size: 1.5rem;
-  letter-spacing: -1px;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to right, #ffffff, #646cff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #646cff;
+  font-weight: 800;
+  padding: 4px 10px;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 6px;
+}
+
+.status-live {
+  color: #ff4646;
+  background: rgba(255, 70, 70, 0.1);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4646;
+  box-shadow: 0 0 0 0 rgba(255, 70, 70, 0.7);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 70, 70, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 70, 70, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 70, 70, 0); }
+}
+
+.watch-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 12px;
+  background: #646cff;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.watch-btn:hover {
+  background: #747bff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(100, 108, 255, 0.5);
+}
+
+.mission-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.mission-acronym {
+  color: #646cff;
+  font-weight: 800;
 }
