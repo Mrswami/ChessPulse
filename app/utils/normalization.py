@@ -45,3 +45,26 @@ def deduplicate_events(events: List[Dict]) -> List[Dict]:
             merged.append(seen[norm_title])
             
     return merged
+
+def boost_hype_from_streamers(events: List[Dict], streamers: List[Dict]) -> List[Dict]:
+    """
+    Cross-references active streamers with tournaments to boost hype.
+    If a streamer is live for a specific event, add +15 Hype.
+    """
+    for event in events:
+        event_norm = normalize_title(event['title'])
+        
+        for s in streamers:
+            s_title_norm = normalize_title(s['title'])
+            
+            # Simple keyword match: 'candidates' in 'GMHikaru - Candidates Round 1'
+            if event_norm in s_title_norm or s_title_norm in event_norm:
+                # MATCH! Streamer is live for this event.
+                event['hype_score'] = min(100, event['hype_score'] + 15)
+                
+                # Add streamer to participants list if not already there
+                streamer_tag = f"📺 {s['name']} ({s['platform']})"
+                if streamer_tag not in event['participants']:
+                    event['participants'].append(streamer_tag)
+                    
+    return events

@@ -4,13 +4,18 @@ import './index.css'
 
 function App() {
   const [tournaments, setTournaments] = useState([])
+  const [filteredTournaments, setFilteredTournaments] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
+  const [subStatus, setSubStatus] = useState(null) // null, 'loading', 'success', 'error'
 
   useEffect(() => {
     fetch('http://localhost:8000/tournaments')
       .then(res => res.json())
       .then(data => {
         setTournaments(data)
+        setFilteredTournaments(data)
         setLoading(false)
       })
       .catch(err => {
@@ -19,17 +24,57 @@ function App() {
       })
   }, [])
 
+  useEffect(() => {
+    const query = searchQuery.toLowerCase()
+    const filtered = tournaments.filter(t => 
+      t.title.toLowerCase().includes(query) || 
+      t.platform.toLowerCase().includes(query) ||
+      t.type.toLowerCase().includes(query)
+    )
+    setFilteredTournaments(filtered)
+  }, [searchQuery, tournaments])
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault()
+    setSubStatus('loading')
+    try {
+      const res = await fetch('http://localhost:8000/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      if (res.ok) {
+        setSubStatus('success')
+        setEmail('')
+      } else {
+        setSubStatus('error')
+      }
+    } catch (err) {
+      setSubStatus('error')
+    }
+  }
+
   return (
     <>
       <nav className="glass-nav">
         <div className="nav-brand">♟️ CHESSPULSE</div>
-        <div className="nav-links" style={{ display: 'flex', gap: '2rem', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>
-          <span>LIVE</span>
-          <span>UPCOMING</span>
-          <span>ARCHIVE</span>
-          <button style={{ background: '#646cff', color: 'white', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800 }}>
-            CONNECT
-          </button>
+        <div className="nav-links">
+          <div className="search-container">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="SEARCH PULSE..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <span className="nav-item">LIVE</span>
+          <span className="nav-item">UPCOMING</span>
+          <button className="connect-btn">CONNECT</button>
         </div>
       </nav>
 
@@ -50,7 +95,7 @@ function App() {
               <div className="pulse-dot" style={{ margin: '0 auto 2rem', width: '20px', height: '20px' }}></div>
               <h2 style={{ letterSpacing: '4px', fontSize: '0.8rem' }}>PULSING THE GLOBE...</h2>
             </div>
-          ) : tournaments.map((t) => (
+          ) : filteredTournaments.length > 0 ? filteredTournaments.map((t) => (
             <div key={t.event_id} className="tournament-card">
               <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -91,18 +136,49 @@ function App() {
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </button>
-              {t.watch_links?.length > 1 && (
-                <div style={{ marginTop: '0.5rem', textAlign: 'center', fontSize: '0.7rem', opacity: 0.3, fontWeight: 700 }}>
-                  +{t.watch_links.length - 1} MORE SOURCES
+              {t.participants?.length > 0 && (
+                <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontWeight: 800, marginBottom: '0.5rem' }}>ACTIVE RADIUS</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {t.participants.slice(0, 3).map(p => (
+                            <span key={p} style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', opacity: 0.6 }}>{p}</span>
+                        ))}
+                    </div>
                 </div>
               )}
             </div>
-          ))}
+          )) : (
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '10rem 0', opacity: 0.3 }}>
+              <h2 style={{ letterSpacing: '2px' }}>NO PULSE FOUND</h2>
+            </div>
+          )}
+        </section>
+
+        <section className="subscribe-section">
+            <div className="subscribe-content">
+                <h2>Never Miss a Move.</h2>
+                <p>Get the Daily Pulse delivered to your inbox every morning at 8:00 AM.</p>
+                <form className="subscribe-form" onSubmit={handleSubscribe}>
+                    <input 
+                        type="email" 
+                        required 
+                        placeholder="your@email.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="sub-input"
+                    />
+                    <button type="submit" className="sub-btn" disabled={subStatus === 'loading'}>
+                        {subStatus === 'loading' ? 'JOINING...' : 'JOIN THE PULSE'}
+                    </button>
+                </form>
+                {subStatus === 'success' && <p className="status-msg success">Pulsing Delivery Confirmed!</p>}
+                {subStatus === 'error' && <p className="status-msg error">Pipeline error. Please try again.</p>}
+            </div>
         </section>
       </main>
 
-      <footer style={{ marginTop: '8rem', paddingBottom: '4rem', color: 'rgba(255,255,255,0.1)', fontSize: '0.7rem', letterSpacing: '2px', fontWeight: 700 }}>
-        CHESSPULSE v0.1.0 • POWERED BY FASTAPI & FIREBASE
+      <footer style={{ marginTop: '4rem', paddingBottom: '4rem', color: 'rgba(255,255,255,0.1)', fontSize: '0.7rem', letterSpacing: '2px', fontWeight: 700, textAlign: 'center' }}>
+        CHESSPULSE v0.3.5 • POWERED BY FASTAPI & RESEND
       </footer>
     </>
   )
